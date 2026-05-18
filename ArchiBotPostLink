@@ -1,0 +1,36 @@
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+import feedparser
+
+TOKEN = "AQUI_TU_TOKEN"
+
+RSS_URL = "https://hnrss.org/frontpage"
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Hola 👋 Soy tu bot.\nUsa /posts o /links")
+
+async def posts(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    feed = feedparser.parse(RSS_URL)
+    mensajes = []
+
+    for entry in feed.entries[:5]:
+        mensajes.append(f"📰 {entry.title}")
+
+    await update.message.reply_text("\n".join(mensajes))
+
+async def links(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    feed = feedparser.parse(RSS_URL)
+    mensajes = []
+
+    for entry in feed.entries[:5]:
+        mensajes.append(f"🔗 {entry.link}")
+
+    await update.message.reply_text("\n".join(mensajes))
+
+app = ApplicationBuilder().token(TOKEN).build()
+
+app.add_handler(CommandHandler("start", start))
+app.add_handler(CommandHandler("posts", posts))
+app.add_handler(CommandHandler("links", links))
+
+app.run_polling()
